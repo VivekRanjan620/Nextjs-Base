@@ -1,150 +1,52 @@
-// app/(dashboard)/dashboard/page.tsx
-// This is the main user dashboard page — /dashboard
-// Notice: No Sidebar, No Header written here
-// They come automatically from layout.tsx above!
+"use client";
 
-// We are only importing our reusable components and using them with data
+import { useEffect, useState } from "react";
 import StatCard from "@/app/components/dashboard/StatCard";
-import DataTable, { Column } from "@/app/components/dashboard/DataTable";
-import Badge from "@/app/components/ui/Badge";
-import Card from "@/app/components/ui/Card";
+import Loader from "@/app/components/ui/Loader";
 
-
-// -------------------------------------------
-// Define the shape of an order object
-// This tells TypeScript what fields each order has
-// -------------------------------------------
-interface Order {
+// Shape of user data from API
+interface UserData {
   id: number;
-  product: string;
-  date: string;
-  amount: string;
-  status: "delivered" | "pending" | "cancelled";
+  name: string;
+  email: string;
+  role: string;
 }
 
-// -------------------------------------------
-// Dummy order data — replace with real DB data later
-// In real app: fetch this from /api/orders
-// -------------------------------------------
-const myOrders: Order[] = [
-  { id: 1, product: "Wireless Headphones", date: "2025-04-10", amount: "$59.99", status: "delivered" },
-  { id: 2, product: "Mechanical Keyboard", date: "2025-04-15", amount: "$89.99", status: "pending" },
-  { id: 3, product: "USB-C Hub", date: "2025-04-18", amount: "$34.99", status: "cancelled" },
-  { id: 4, product: "Monitor Stand", date: "2025-04-20", amount: "$44.99", status: "delivered" },
-];
-
-// -------------------------------------------
-// Column definitions for DataTable
-// "key" maps to the field name in Order interface
-// "render" lets us show custom UI instead of plain text
-// -------------------------------------------
-const orderColumns: Column<Order>[] = [
-  {
-    key: "id",
-    label: "Order ID",
-    render: (value) => <span className="text-gray-500">#{value}</span>,
-  },
-  {
-    key: "product",
-    label: "Product",
-  },
-  {
-    key: "date",
-    label: "Date",
-  },
-  {
-    key: "amount",
-    label: "Amount",
-    render: (value) => <span className="text-green-400 font-medium">{value}</span>,
-  },
-  {
-    key: "status",
-    label: "Status",
-    // Custom render — show Badge instead of plain text
-    render: (value) => (
-      <Badge
-        label={value}
-        variant={
-          value === "delivered" ? "success" :
-          value === "pending"   ? "warning" :
-          "danger"  // cancelled
-        }
-        dot
-      />
-    ),
-  },
-];
-
 export default function UserDashboardPage() {
+  const [user, setUser] = useState<UserData | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch real user data from API
+    fetch("/api/dashboard/stats")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) setUser(data.user);
+        setIsLoading(false);
+      });
+  }, []); // [] = sirf ek baar run hoga — page load pe
+
+  // Show loader while data is coming
+  if (isLoading) return <Loader fullScreen text="Loading dashboard..." />;
+
   return (
     <div className="flex flex-col gap-6">
-
-      {/* Welcome message */}
       <div>
-        <h2 className="text-white text-2xl font-bold">Welcome back, John! 👋</h2>
-        <p className="text-gray-400 text-sm mt-1">Here is a summary of your account.</p>
+        <h2 className="text-white text-2xl font-bold">
+          Welcome back, {user?.name}! 👋
+        </h2>
+        <p className="text-gray-400 text-sm mt-1">
+          {user?.email}
+        </p>
       </div>
 
-      {/* -------------------------------------------
-          Stat Cards Section
-          StatCard is reusable — just pass different props
-          Same component shows different data for each card
-      ------------------------------------------- */}
+      {/* Stats — abhi static hain, baad mein orders table bane toh real honge */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard
-          title="Total Orders"
-          value={4}
-          icon="🛒"
-          change="2 this month"
-          changeType="positive"
-        />
-        <StatCard
-          title="Delivered"
-          value={2}
-          icon="✅"
-          change="on time"
-          changeType="positive"
-        />
-        <StatCard
-          title="Pending"
-          value={1}
-          icon="⏳"
-          change="in progress"
-          changeType="neutral"
-        />
-        <StatCard
-          title="Cancelled"
-          value={1}
-          icon="❌"
-          change="1 this month"
-          changeType="negative"
-        />
+        <StatCard title="Total Orders"  value={0}  icon="🛒" />
+        <StatCard title="Delivered"     value={0}  icon="✅" />
+        <StatCard title="Pending"       value={0}  icon="⏳" />
+        <StatCard title="Cancelled"     value={0}  icon="❌" />
       </div>
-
-      {/* -------------------------------------------
-          Orders Table Section
-          Card wraps the DataTable for consistent styling
-          DataTable receives columns + data as props
-      ------------------------------------------- */}
-      <Card
-        title="My Recent Orders"
-        subtitle="All your orders in one place"
-        padding="sm"
-        className="bg-transparent border-0 shadow-none"
-      >
-        {/* 
-          DataTable is fully reusable:
-          - columns: what to show and how
-          - data: the actual rows
-          - emptyMessage: shown if no orders exist
-        */}
-        <DataTable
-          columns={orderColumns}
-          data={myOrders}
-          emptyMessage="You have no orders yet."
-        />
-      </Card>
-
     </div>
   );
 }
