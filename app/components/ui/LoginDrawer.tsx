@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 const slides = [
   { id: 1, image: "/banners/banners1.webp" },
@@ -17,9 +18,12 @@ interface LoginDrawerProps {
 }
 
 export default function LoginDrawer({ isOpen, onClose }: LoginDrawerProps) {
+  const router = useRouter();
   const [current, setCurrent] = useState(0);
-  const [mobile, setMobile] = useState("");   // Only mobile number
+
+  const [form, setForm] = useState({ email: "", password: "" });
   const [message, setMessage] = useState("");
+  const [isSuccess, setIsSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Auto slide every 3 seconds
@@ -49,27 +53,42 @@ export default function LoginDrawer({ isOpen, onClose }: LoginDrawerProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Basic validation — 10 digit number
-    if (!mobile || mobile.length !== 10) {
-      setMessage("Please enter a valid 10-digit mobile number.");
+    // Basic validation
+    if (!form.email || !form.password) {
+      setMessage("Please enter email and password.");
+      setIsSuccess(false);
       return;
     }
 
     setIsLoading(true);
-    // TODO: Connect to OTP API later
-    // For now just show success message
-    setMessage("OTP sent to +91 " + mobile);
+
+    const res = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
+
+    const data = await res.json();
+    setMessage(data.message);
+    setIsSuccess(data.success);
     setIsLoading(false);
+
+    if (data.success) {
+      onClose();
+      // Role ke hisaab se redirect
+      if (data.role === "admin") {
+        router.push("/admin");
+      } else {
+        router.push("/dashboard");
+      }
+    }
   };
 
   return (
     <>
       {/* Dark overlay — click to close */}
       {isOpen && (
-        <div
-          className="fixed inset-0 bg-black/40 z-40"
-          onClick={onClose}
-        />
+        <div className="fixed inset-0 bg-black/40 z-40" onClick={onClose} />
       )}
 
       {/* Drawer — slides from right */}
@@ -104,16 +123,14 @@ export default function LoginDrawer({ isOpen, onClose }: LoginDrawerProps) {
                 key={i}
                 onClick={() => setCurrent(i)}
                 className={`rounded-full transition-all ${
-                  i === current
-                    ? "bg-red-500 w-4 h-2.5"
-                    : "bg-gray-300 w-2.5 h-2.5"
+                  i === current ? "bg-red-500 w-4 h-2.5" : "bg-gray-300 w-2.5 h-2.5"
                 }`}
               />
             ))}
           </div>
         </div>
 
-        {/* ── Bottom: Form ── */}
+        {/* ── Bottom: Login Form ── */}
         <div className="flex-1 px-6 pt-8 pb-6 flex flex-col">
 
           <h1 className="text-2xl font-bold text-gray-900 mb-6">
@@ -122,28 +139,27 @@ export default function LoginDrawer({ isOpen, onClose }: LoginDrawerProps) {
 
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
 
-            {/* Mobile number input with +91 prefix */}
-            <div className="flex items-center border-b border-gray-300 focus-within:border-red-500 transition-colors gap-2 pb-1">
-              <span className="text-gray-500 text-base">+91</span>
-              <div className="w-px h-5 bg-gray-300" />
-              <input
-                type="tel"
-                placeholder="Mobile Number"
-                value={mobile}
-                maxLength={10}
-                onChange={(e) => {
-                  // Only allow numbers
-                  const val = e.target.value.replace(/\D/g, "");
-                  setMobile(val);
-                  setMessage("");
-                }}
-                className="flex-1 outline-none text-gray-800 text-base py-1 placeholder-gray-400 bg-transparent"
-              />
-            </div>
+            {/* Email input */}
+            <input
+              type="email"
+              placeholder="Email"
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              className="w-full border-b border-gray-300 focus:border-red-500 outline-none text-gray-800 text-base py-2 placeholder-gray-400 bg-transparent transition-colors"
+            />
 
-            {/* Message */}
+            {/* Password input */}
+            <input
+              type="password"
+              placeholder="Password"
+              value={form.password}
+              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              className="w-full border-b border-gray-300 focus:border-red-500 outline-none text-gray-800 text-base py-2 placeholder-gray-400 bg-transparent transition-colors"
+            />
+
+            {/* Success / Error message */}
             {message && (
-              <p className={`text-sm ${message.includes("OTP") ? "text-green-500" : "text-red-500"}`}>
+              <p className={`text-sm ${isSuccess ? "text-green-500" : "text-red-500"}`}>
                 {message}
               </p>
             )}
