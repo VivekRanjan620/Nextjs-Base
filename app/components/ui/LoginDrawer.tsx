@@ -15,9 +15,10 @@ const slides = [
 interface LoginDrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  onLoginSuccess?: () => void;
 }
 
-export default function LoginDrawer({ isOpen, onClose }: LoginDrawerProps) {
+export default function LoginDrawer({ isOpen, onClose, onLoginSuccess  }: LoginDrawerProps) {
   const router = useRouter();
   const [current, setCurrent] = useState(0);
 
@@ -74,13 +75,8 @@ export default function LoginDrawer({ isOpen, onClose }: LoginDrawerProps) {
     setIsLoading(false);
 
     if (data.success) {
-      onClose();
-      // Role ke hisaab se redirect
-      if (data.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/dashboard");
-      }
+      onLoginSuccess?.();  // Navbar ko bataye — profile dikhao
+  onClose();
     }
   };
 
