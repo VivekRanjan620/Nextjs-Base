@@ -1,201 +1,187 @@
-"use client";
+import Link from 'next/link'
 
-// components/layout/Footer.tsx
-// Full footer — uses our reusable components:
-// Input.tsx     → Newsletter email field
-// Button.tsx    → Subscribe button
-// Badge.tsx     → "New" tag on certain links
-// Toast.tsx     → Success/error notification on subscribe
+const companyLinks = [
+  { label: 'Privacy Policy', href: '/privacy-policy' },
+  { label: 'Terms and Condition', href: '/terms' },
+  { label: 'Help & Support', href: '/support' },
+]
 
-import Link from "next/link";
-import { useState } from "react";
-import Input from "@/app/components/ui/Input";
-import Button from "@/app/components/ui/Button";
-import Badge from "@/app/components/ui/Badge";
-import { useToast, ToastContainer } from "@/app/components/ui/Toast";
-
-// Footer columns data — update links here without touching JSX
-const footerLinks = [
-  {
-    heading: "Product",
-    links: [
-      { label: "Home",      href: "/",          isNew: false },
-      { label: "Features",  href: "/#features", isNew: false },
-      { label: "Dashboard", href: "/dashboard", isNew: false },
-    ],
-  },
-  {
-    heading: "Account",
-    links: [
-      { label: "Login",    href: "/login",             isNew: false },
-      { label: "Register", href: "/register",           isNew: false },
-      { label: "Profile",  href: "/dashboard/profile", isNew: true }, // Badge dikhega
-    ],
-  },
-  {
-    heading: "Company",
-    links: [
-      { label: "About Us",        href: "/about",   isNew: false },
-      { label: "Contact",         href: "/contact", isNew: false },
-      { label: "Privacy Policy",  href: "/privacy", isNew: false },
-    ],
-  },
-];
-
-// Social media links — update href with your real profiles
-const socialLinks = [
-  { label: "GitHub",    icon: "🐙", href: "https://github.com" },
-  { label: "Twitter",   icon: "🐦", href: "https://twitter.com" },
-  { label: "LinkedIn",  icon: "💼", href: "https://linkedin.com" },
-  { label: "Instagram", icon: "📸", href: "https://instagram.com" },
-];
+const quickLinks = [
+  { label: 'Store Locator', href: '/store-locator' },
+  { label: 'Sitemap', href: '/sitemap' },
+  { label: 'Why Tendercuts?', href: '/why-tendercuts' },
+  { label: 'Quality check', href: '/quality' },
+  { label: 'Certificates', href: '/certificates' },
+  { label: 'Careers', href: '/careers' },
+]
 
 export default function Footer() {
-  const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-
-  // useToast hook — from our reusable Toast component
-  // gives us: toast.success(), toast.error(), toast.warning()
-  const toast = useToast();
-
-  // Newsletter subscribe handler
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    // Show warning toast if email is empty — reusing Toast component
-    if (!email) {
-      toast.warning("Please enter your email address.");
-      return;
-    }
-
-    setIsLoading(true);
-
-    // TODO: Replace with real newsletter API call later
-    await new Promise((res) => setTimeout(res, 1000));
-
-    // Show success toast — reusing Toast component
-    toast.success("You are subscribed! Welcome aboard 🎉");
-    setEmail("");
-    setIsLoading(false);
-  };
-
   return (
-    <footer className="bg-gray-900 border-t border-gray-800 text-gray-400">
+    <footer className="bg-[#f7f7f7] border-t border-gray-200 px-12 pt-10 pb-6">
 
-      {/* ── Main Content — Brand + Nav Columns ── */}
-      <div className="max-w-6xl mx-auto px-6 py-14 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
 
-        {/* Column 1 — Brand + Description + Social Icons */}
-        <div className="flex flex-col gap-4">
-          <Link href="/" className="text-white font-bold text-xl">
-            ⚡ MyApp
-          </Link>
+        { /* ── COMPANY ── */ }
+        <div>
+          <h4 className="text-xs font-bold tracking-widest uppercase text-gray-900 mb-4">
+            Company
+          </h4>
+          {companyLinks.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="block text-sm text-gray-400 mb-3 hover:text-[#c0392b] transition-colors"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
 
-          <p className="text-sm leading-relaxed">
-            A full-stack platform built with Next.js and MySQL.
-            Secure, fast, and ready to scale.
-          </p>
+        { /* ── STAY CONNECTED ── */ }
+        <div>
+          <h4 className="text-xs font-bold tracking-widest uppercase text-gray-900 mb-4">
+            Stay Connected
+          </h4>
 
-          {/* Social Icons */}
-          <div className="flex gap-3 mt-1">
-            {socialLinks.map((social) => (
-              <a
-                key={social.label}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={social.label}
-                className="w-9 h-9 rounded-lg bg-gray-800 border border-gray-700 flex items-center justify-center hover:border-blue-500 hover:text-white transition-all text-base"
-              >
-                {social.icon}
-              </a>
-            ))}
+          <div className="flex items-center gap-2 mb-3">
+            <MailIcon />
+            <a
+              href="mailto:cs@tendercuts.in"
+              className="text-sm text-gray-500 underline hover:text-[#c0392b] transition-colors"
+            >
+              cs@tendercuts.in
+            </a>
+          </div>
+
+          <div className="flex items-center gap-2 mb-3">
+            <PhoneIcon />
+            <span className="text-sm text-gray-400">Chennai - 9543754375</span>
+          </div>
+
+          <div className="flex items-center gap-2 mb-3">
+            <FacebookIcon />
+            <a
+              href="https://facebook.com/tendercuts"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-500 underline hover:text-[#c0392b] transition-colors"
+            >
+              Facebook
+            </a>
           </div>
         </div>
 
-        {/* Columns 2, 3, 4 — Nav Links */}
-        {footerLinks.map((col) => (
-          <div key={col.heading} className="flex flex-col gap-3">
+        { /* ── LINKS ── */ }
+        <div>
+          <h4 className="text-xs font-bold tracking-widest uppercase text-gray-900 mb-4">
+            Links
+          </h4>
+          {quickLinks.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="block text-sm text-gray-400 mb-3 hover:text-[#c0392b] transition-colors"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
 
-            {/* Column heading */}
-            <h4 className="text-white font-semibold text-sm uppercase tracking-wider">
-              {col.heading}
-            </h4>
+        { /* ── APP BUTTONS ── */ }
+        <div>
+          <h4 className="text-xs font-bold tracking-widest uppercase text-transparent mb-4">
+            &nbsp;
+          </h4>
 
-            {/* Links list */}
-            <ul className="flex flex-col gap-2">
-              {col.links.map((link) => (
-                <li key={link.label} className="flex items-center gap-2">
-                  <Link
-                    href={link.href}
-                    className="text-sm hover:text-white transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-
-                  {/* Reusable Badge — only shows if isNew is true */}
-                  {link.isNew && (
-                    <Badge label="New" variant="info" size="sm" />
-                  )}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
-      </div>
-
-      {/* ── Newsletter Section ── */}
-      <div className="border-t border-gray-800">
-        <div className="max-w-6xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-
-          <div>
-            <p className="text-white font-semibold text-sm">Stay up to date</p>
-            <p className="text-sm mt-0.5">Get the latest updates delivered to your inbox.</p>
-          </div>
-
-          {/* Form — uses reusable Input + Button */}
-          <form
-            onSubmit={handleSubscribe}
-            className="flex gap-2 w-full sm:w-auto items-end"
+          <a
+            href="https://apps.apple.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-black rounded-lg px-4 py-2.5 mb-3 w-40 hover:bg-gray-800 transition-colors"
           >
-            {/* Reusable Input component */}
-            <div className="flex-1 sm:w-64">
-              <Input
-                label=""
-                name="newsletter-email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+            <AppleIcon />
+            <div>
+              <span className="block text-[9px] text-white/70 tracking-wide">
+                Available on the
+              </span>
+              <span className="block text-[15px] font-medium text-white leading-tight">
+                App Store
+              </span>
             </div>
+          </a>
 
-            {/* Reusable Button component — isLoading spinner built in */}
-            <Button
-              label="Subscribe"
-              type="submit"
-              variant="primary"
-              isLoading={isLoading}
-            />
-          </form>
+          <a
+            href="https://play.google.com"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 bg-black rounded-lg px-4 py-2.5 w-40 hover:bg-gray-800 transition-colors"
+          >
+            <PlayIcon />
+            <div>
+              <span className="block text-[9px] text-white/70 tracking-wide uppercase">
+                Android App on
+              </span>
+              <span className="block text-[15px] font-medium text-white leading-tight">
+                Google play
+              </span>
+            </div>
+          </a>
         </div>
+
       </div>
 
-      {/* ── Bottom Bar ── */}
-      <div className="border-t border-gray-800">
-        <div className="max-w-6xl mx-auto px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
-          <p>© {new Date().getFullYear()} MyApp. All rights reserved.</p>
-          <div className="flex gap-4">
-            <Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link>
-            <Link href="/terms"   className="hover:text-white transition-colors">Terms of Service</Link>
-          </div>
-        </div>
+      { /* ── BOTTOM BAR ── */ }
+      <div className="border-t border-gray-200 pt-5 flex items-center justify-between">
+        <span className="text-lg font-medium text-[#c0392b]">TenderCuts</span>
+        <span className="text-xs text-gray-400">
+          © {new Date().getFullYear()} TenderCuts. All rights reserved.
+        </span>
       </div>
-
-      {/* Toast container — bottom-right corner notifications */}
-      {/* Reusable Toast component — manages all toast messages */}
-      <ToastContainer toasts={toast.toasts} onRemove={toast.removeToast} />
 
     </footer>
-  );
+  )
+}
+
+// ── SVG Icons ────────────────────────────────
+function MailIcon() {
+  return (
+    <svg className="w-[18px] h-[18px] opacity-50 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
+    </svg>
+  )
+}
+
+function PhoneIcon() {
+  return (
+    <svg className="w-[18px] h-[18px] opacity-50 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z" />
+    </svg>
+  )
+}
+
+function FacebookIcon() {
+  return (
+    <svg className="w-[18px] h-[18px] shrink-0" viewBox="0 0 24 24" fill="#1877F2">
+      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+    </svg>
+  )
+}
+
+function AppleIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
+      <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z" />
+    </svg>
+  )
+}
+
+function PlayIcon() {
+  return (
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+      <path d="M3.18 23.76c.3.17.64.24.99.19l12.6-7.27-2.61-2.61-10.98 9.69z" fill="#EA4335" />
+      <path d="M22.47 10.22C21.82 9.6 20.95 9.24 20 9.24c-.95 0-1.82.36-2.47.98l-1.85 1.85 2.61 2.61 4.18-2.41c.58-.34.58-1.24 0-1.58v.53z" fill="#FBBC05" />
+      <path d="M3.18.24C2.72.5 2.4 1.01 2.4 1.62v20.76c0 .61.32 1.12.78 1.38l12.98-11.88L3.18.24z" fill="#4285F4" />
+      <path d="M4.17.43l12.6 7.27-2.61 2.61L3.18.24C3.48.09 3.87.1 4.17.43z" fill="#34A853" />
+    </svg>
+  )
 }
