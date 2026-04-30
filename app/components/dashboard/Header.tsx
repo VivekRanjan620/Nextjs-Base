@@ -4,16 +4,19 @@
 // Shows current page title, user avatar, and notification bell
 // Used in both user and admin dashboards — only "title" changes
 
-// import Avatar from "@/components/ui/Avatar";
-// import Badge from "@/components/ui/Badge";
+
+"use client";
+
 import Avatar from "../ui/Avatar";
 import Badge from "../ui/Badge";
+import { useState } from "react";
 
 interface HeaderProps {
-  title: string;          // Page title shown on the left e.g. "Overview", "Manage Users"
-  userName: string;       // Logged in user's name
-  userImage?: string;     // Optional profile picture
-  notificationCount?: number; // Number of unread notifications
+  title: string;
+  userName: string;
+  userImage?: string;
+  notificationCount?: number;
+  onMenuClick?: () => void; // ← hamburger click handler
 }
 
 export default function Header({
@@ -21,12 +24,24 @@ export default function Header({
   userName,
   userImage,
   notificationCount = 0,
+  onMenuClick,
 }: HeaderProps) {
   return (
-    <header className="h-16 bg-gray-900 border-b border-gray-800 px-6 flex items-center justify-between">
+    <header className="h-16 bg-gray-900 border-b border-gray-800 px-4 md:px-6 flex items-center justify-between">
 
-      {/* Left side — Page title */}
-      <div>
+      {/* Left side — Hamburger (mobile) + Page title */}
+      <div className="flex items-center gap-3">
+
+        {/* Hamburger — sirf mobile pe dikhega */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden text-gray-400 hover:text-white transition-colors p-1"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
+
         <h1 className="text-white font-semibold text-lg">{title}</h1>
       </div>
 
@@ -36,8 +51,6 @@ export default function Header({
         {/* Notification bell */}
         <div className="relative cursor-pointer">
           <span className="text-gray-400 hover:text-white text-xl transition-colors">🔔</span>
-
-          {/* Show red dot badge if there are notifications */}
           {notificationCount > 0 && (
             <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center">
               {notificationCount > 9 ? "9+" : notificationCount}
@@ -45,16 +58,9 @@ export default function Header({
           )}
         </div>
 
-        {/* Divider */}
         <div className="w-px h-6 bg-gray-700" />
 
-        {/* User avatar with name */}
-        <Avatar
-          name={userName}
-          imageUrl={userImage}
-          size="sm"
-          showName
-        />
+        <Avatar name={userName} imageUrl={userImage} size="sm" showName />
       </div>
 
     </header>

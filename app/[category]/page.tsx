@@ -1,37 +1,14 @@
 "use client";
 
-// Add to cart button — localStorage mein save
-// Mobile: CartBar neeche dikhega
-// Login check CartBar handle karega
-
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { useState, useEffect } from "react";
-import { addToCart, getCart } from "@/app/lib/cartStore";
+import { useState, useEffect, useRef } from "react";
+import { addToCart, getCart, updateQuantity } from "@/app/lib/cartStore";
 import CartBar from "@/app/components/ui/CartBar";
 import CartDrawer from "@/app/components/ui/CartDrawer";
 import LoginDrawer from "@/app/components/ui/LoginDrawer";
 
-const allProducts: Record<string, any[]> = {
-   chicken: [
-    { id: 1, name: "Chicken Curry Cut (Skin Off)", sub: "Customise your product", weight: null, originalPrice: null, salePrice: null, startsFrom: 174, tag: "Antibiotic Free", discount: null, customisable: true, image: "/products/category/chicken/chicken-curry-skin-off.webp" },
-    { id: 2, name: "Chicken Liver", sub: "Chicken Liver", weight: "190 - 210 Gms", originalPrice: 59, salePrice: 49, startsFrom: null, tag: "Antibiotic Free", discount: 17, customisable: false, image: "/products/chicken-liver.webp" },
-    { id: 3, name: "Chicken Curry Cut (Skin On)", sub: "Customise your product", weight: null, originalPrice: null, salePrice: null, startsFrom: 149, tag: "Antibiotic Free", discount: null, customisable: true, image: "/products/chicken-curry-on.webp" },
-    { id: 4, name: "Chicken Wings", sub: "18 - 20 Pieces", weight: "480 - 500 Gms", originalPrice: 150, salePrice: 155, startsFrom: null, tag: "Antibiotic Free", discount: null, customisable: false, image: "/products/chicken-wings.webp" },
-    { id: 5, name: "Chicken Breast Boneless", sub: "Pack of 2", weight: "240 - 280 Gms", originalPrice: 185, salePrice: 179, startsFrom: null, tag: "Antibiotic Free", discount: null, customisable: false, image: "/products/chicken-breast.webp" },
-    { id: 6, name: "Chicken Boneless (Cubes)", sub: "18 - 20 Pieces", weight: "480 - 500 Gms", originalPrice: 315, salePrice: 309, startsFrom: null, tag: "Antibiotic Free", discount: null, customisable: false, image: "/products/chicken-boneless.webp" },
-  ],
-   mutton: [
-    { id: 1, name: "Chicken Curry Cut (Skin Off)", sub: "Customise your product", weight: null, originalPrice: null, salePrice: null, startsFrom: 174, tag: "Antibiotic Free", discount: null, customisable: true, image: "/products/chicken-curry-off.webp" },
-    { id: 2, name: "Chicken Liver", sub: "Chicken Liver", weight: "190 - 210 Gms", originalPrice: 59, salePrice: 49, startsFrom: null, tag: "Antibiotic Free", discount: 17, customisable: false, image: "/products/chicken-liver.webp" },
-    { id: 3, name: "Chicken Curry Cut (Skin On)", sub: "Customise your product", weight: null, originalPrice: null, salePrice: null, startsFrom: 149, tag: "Antibiotic Free", discount: null, customisable: true, image: "/products/chicken-curry-on.webp" },
-    { id: 4, name: "Chicken Wings", sub: "18 - 20 Pieces", weight: "480 - 500 Gms", originalPrice: 150, salePrice: 155, startsFrom: null, tag: "Antibiotic Free", discount: null, customisable: false, image: "/products/chicken-wings.webp" },
-    { id: 5, name: "Chicken Breast Boneless", sub: "Pack of 2", weight: "240 - 280 Gms", originalPrice: 185, salePrice: 179, startsFrom: null, tag: "Antibiotic Free", discount: null, customisable: false, image: "/products/chicken-breast.webp" },
-    { id: 6, name: "Chicken Boneless (Cubes)", sub: "18 - 20 Pieces", weight: "480 - 500 Gms", originalPrice: 315, salePrice: 309, startsFrom: null, tag: "Antibiotic Free", discount: null, customisable: false, image: "/products/chicken-boneless.webp" },
-  ],
-};
 
-// Category nav tabs — horizontal scroll on mobile
 const categoryTabs = [
   { label: "Chicken",       href: "/chicken",       image: "/Category/wallpaper/chicken.png" },
   { label: "Mutton",        href: "/mutton",        image: "/Category/wallpaper/mutton.png" },
@@ -39,36 +16,50 @@ const categoryTabs = [
   { label: "Ready To Cook", href: "/ready-to-cook", image: "/Category/wallpaper/readycook.png" },
   { label: "Biryani",       href: "/biryani",       image: "/Category/wallpaper/biryani.png" },
   { label: "Snacks",        href: "/snacks",        image: "/Category/wallpaper/snacks.png" },
-  { label: "Pre book",      href: "/prebook",        image: "/Category/wallpaper/prebook.png"     },
-  { label: "Elite offers",  href: "/elite-offers",   image: "/Category/wallpaper/elite.png" },
-  { label: "Cold cuts",     href: "/cold-cuts",      image: "/Category/wallpaper/coldcuts.png" },
-  { label: "Eggs",          href: "/eggs",           image: "/Category/wallpaper/eggs.png" },
-  { label: "Pickles",       href: "/pickles",        image: "/Category/wallpaper/pickles.png" },
+  { label: "Pre book",      href: "/prebook",       image: "/Category/wallpaper/prebook.png" },
+  { label: "Elite offers",  href: "/elite-offers",  image: "/Category/wallpaper/elite.png" },
+  { label: "Cold cuts",     href: "/cold-cuts",     image: "/Category/wallpaper/coldcuts.png" },
+  { label: "Eggs",          href: "/eggs",          image: "/Category/wallpaper/eggs.png" },
+  { label: "Pickles",       href: "/pickles",       image: "/Category/wallpaper/pickles.png" },
   { label: "Spices",        href: "/spices",        image: "/Category/wallpaper/spices.png" },
-  { label: "Dry fish",      href: "/dry-fish",       image: "/Category/wallpaper/dryfish.png" },
+  { label: "Dry fish",      href: "/dry-fish",      image: "/Category/wallpaper/dryfish.png" },
 ];
 
 export default function CategoryPage() {
   const params = useParams();
   const category = params.category as string;
-  const products = allProducts[category] || [];
+
+  // ✅ DB se products aayenge — empty array se start
+  const [products, setProducts] = useState<any[]>([]);
+  const [loadingProducts, setLoadingProducts] = useState(true);
 
   const [cartDrawerOpen, setCartDrawerOpen] = useState(false);
   const [loginDrawerOpen, setLoginDrawerOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // Track which products are in cart for UI
   const [cartItems, setCartItems] = useState<Record<number, number>>({});
+  const isLoggedInRef = useRef(false);
 
-  // Check login + cart on mount
-  useEffect(() => {
+  // ✅ DB se products fetch karo
+  const fetchProducts = async () => {
+    setLoadingProducts(true);
+    try {
+      const res = await fetch(`/api/products?category=${category}`);
+      const data = await res.json();
+      if (data.success) setProducts(data.products);
+    } catch (err) {
+      console.error("Products fetch failed", err);
+    }
+    setLoadingProducts(false);
+  };
+
+  const checkAuth = () => {
     fetch("/api/auth/me")
       .then((r) => r.json())
-      .then((d) => setIsLoggedIn(d.success));
-
-    refreshCartItems();
-    window.addEventListener("cartUpdated", refreshCartItems);
-    return () => window.removeEventListener("cartUpdated", refreshCartItems);
-  }, []);
+      .then((d) => {
+        isLoggedInRef.current = !!d.loggedIn;
+        setIsLoggedIn(!!d.loggedIn);
+      });
+  };
 
   const refreshCartItems = () => {
     const cart = getCart();
@@ -77,19 +68,32 @@ export default function CategoryPage() {
     setCartItems(map);
   };
 
+  useEffect(() => {
+    fetchProducts();  // ✅ Page load pe products fetch karo
+    checkAuth();
+    refreshCartItems();
+    window.addEventListener("cartUpdated", refreshCartItems);
+    window.addEventListener("authChanged", checkAuth);
+    return () => {
+      window.removeEventListener("cartUpdated", refreshCartItems);
+      window.removeEventListener("authChanged", checkAuth);
+    };
+  }, [category]); // ✅ category change hone pe dobara fetch karo
+
   const handleAdd = (product: any) => {
     addToCart({
       id: product.id,
       name: product.name,
-      price: product.salePrice,
-      originalPrice: product.originalPrice,
-      weight: product.weight,
-      image: product.image,
+      // ✅ DB columns — snake_case
+      price: product.sale_price || product.starts_from,
+      originalPrice: product.original_price || product.starts_from,
+      weight: product.weight || "",
+      image: product.image_url,
     });
   };
 
   const handleCartClick = () => {
-    if (!isLoggedIn) {
+    if (!isLoggedInRef.current) {
       setLoginDrawerOpen(true);
     } else {
       setCartDrawerOpen(true);
@@ -102,9 +106,9 @@ export default function CategoryPage() {
     .join(" ");
 
   return (
-    <div className="bg-gray-50 min-h-screen pb-28 md:pb-0">
+    <div className="bg-gray-50 min-h-screen pb-40 md:pb-0">
 
-      {/* Category Tabs */}
+      {/* Category Tabs — same */}
       <div className="bg-gradient-to-r from-[#ffe0e4] via-[#ffeff1] to-[#fff5f6] border-b border-red-100">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center gap-1 overflow-x-auto py-3" style={{ scrollbarWidth: "none" }}>
@@ -126,7 +130,7 @@ export default function CategoryPage() {
         </div>
       </div>
 
-      {/* Breadcrumb */}
+      {/* Breadcrumb — same */}
       <div className="max-w-7xl mx-auto px-4 py-3 text-sm text-gray-500">
         <Link href="/" className="hover:text-red-500">Home</Link>
         <span className="mx-1">/</span>
@@ -135,16 +139,23 @@ export default function CategoryPage() {
 
       {/* Product Grid */}
       <div className="max-w-7xl mx-auto px-4">
-        {products.length === 0 ? (
+
+        {/* Loading state */}
+        {loadingProducts ? (
+          <div className="flex justify-center py-20">
+            <div className="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin" />
+          </div>
+
+        ) : products.length === 0 ? (
           <p className="text-center text-gray-400 py-20">No products found.</p>
+
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {products.map((product) => (
               <div key={product.id} className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-100">
-
-                {/* Image */}
                 <div className="relative w-full h-[200px] md:h-[220px] bg-gray-100">
-                  <img src={product.image} alt={product.name} className="w-full h-full object-cover" />
+                  {/* ✅ image_url — DB column name */}
+                  <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                   {product.discount && (
                     <span className="absolute top-3 left-3 bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
                       {product.discount}% Off
@@ -157,7 +168,6 @@ export default function CategoryPage() {
                   )}
                 </div>
 
-                {/* Info */}
                 <div className="p-4">
                   <h3 className="text-gray-900 font-bold text-base leading-snug">{product.name}</h3>
                   <p className="text-gray-500 text-sm mt-0.5">{product.sub}</p>
@@ -170,47 +180,36 @@ export default function CategoryPage() {
 
                   <div className="flex items-center justify-between mt-3">
                     <div>
-                      {product.startsFrom && (
-                        <p className="text-gray-900 font-bold text-sm">Starts from ₹{product.startsFrom}</p>
+                      {/* ✅ starts_from — DB column name */}
+                      {product.starts_from && (
+                        <p className="text-gray-900 font-bold text-sm">Starts from ₹{product.starts_from}</p>
                       )}
-                      {product.originalPrice && !product.startsFrom && (
+                      {product.original_price && !product.starts_from && (
                         <div className="flex items-center gap-2">
-                          <span className="text-gray-400 text-xs line-through">₹{product.originalPrice}</span>
-                          <span className="text-gray-900 font-bold text-base">₹{product.salePrice}</span>
+                          <span className="text-gray-400 text-xs line-through">₹{product.original_price}</span>
+                          <span className="text-gray-900 font-bold text-base">₹{product.sale_price}</span>
                         </div>
                       )}
                     </div>
 
-                    {/* Add button — agar cart mein hai toh quantity controls */}
                     <div className="flex flex-col items-end">
                       {cartItems[product.id] ? (
-                        // Already in cart — show quantity controls
                         <div className="flex items-center border-2 border-red-500 rounded-lg overflow-hidden">
                           <button
-                            onClick={() => {
-                              const { updateQuantity } = require("@/app/lib/cartStore");
-                              updateQuantity(product.id, cartItems[product.id] - 1);
-                            }}
+                            onClick={() => updateQuantity(product.id, cartItems[product.id] - 1)}
                             className="w-8 h-8 flex items-center justify-center text-red-500 hover:bg-red-50 font-bold text-lg"
-                          >
-                            −
-                          </button>
+                          >−</button>
                           <span className="w-8 text-center text-sm font-bold">{cartItems[product.id]}</span>
                           <button
                             onClick={() => handleAdd(product)}
                             className="w-8 h-8 flex items-center justify-center text-red-500 hover:bg-red-50 font-bold text-lg"
-                          >
-                            +
-                          </button>
+                          >+</button>
                         </div>
                       ) : (
-                        // Not in cart — Add button
                         <button
                           onClick={() => handleAdd(product)}
                           className="bg-red-500 hover:bg-red-600 text-white font-bold px-6 py-2 rounded-lg transition-colors text-sm"
-                        >
-                          Add
-                        </button>
+                        >Add</button>
                       )}
                       {product.customisable && (
                         <span className="text-gray-400 text-[10px] mt-0.5">customisable</span>
@@ -224,25 +223,26 @@ export default function CategoryPage() {
         )}
       </div>
 
-      {/* Mobile CartBar — neeche fixed */}
+      {/* CartBar, CartDrawer, LoginDrawer — same */}
       <CartBar onCartClick={handleCartClick} />
-
-      {/* Cart Drawer — desktop */}
       <CartDrawer
         isOpen={cartDrawerOpen}
         onClose={() => setCartDrawerOpen(false)}
-        onLoginRequired={() => setLoginDrawerOpen(true)}
+        onLoginRequired={() => {
+          setCartDrawerOpen(false);
+          setLoginDrawerOpen(true);
+        }}
         isLoggedIn={isLoggedIn}
       />
-
-      {/* Login Drawer */}
       <LoginDrawer
         isOpen={loginDrawerOpen}
         onClose={() => setLoginDrawerOpen(false)}
         onLoginSuccess={() => {
+          window.dispatchEvent(new Event("authChanged"));
+          isLoggedInRef.current = true;
           setIsLoggedIn(true);
           setLoginDrawerOpen(false);
-          setCartDrawerOpen(true); // Login ke baad cart open karo
+          setCartDrawerOpen(true);
         }}
       />
     </div>
