@@ -3,6 +3,7 @@ import CategorySection from "@/app/components/home/CategorySection";
 import TopPicks from "@/app/components/home/TopPicks";
 import BlogSection from "@/app/components/home/BlogSection";
 import YoutubeSection from "@/app/components/home/YoutubeSection";
+import AboutSection from "./components/home/AboutSection";
 
 export default function HomePage() {
   return (
@@ -21,6 +22,8 @@ export default function HomePage() {
 
       {/* Youtube Videos — 4 video thumbnails */}
       <YoutubeSection />
+
+      <AboutSection />
 
     </div>
   );
