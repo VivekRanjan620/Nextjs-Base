@@ -1,6 +1,5 @@
 "use client";
 
-// components/ui/CartBar.tsx
 // Mobile bottom cart bar — product add hone pe dikhta hai
 // Cart pe click → login nahi? → LoginDrawer, login hai? → CartDrawer
 
@@ -29,7 +28,7 @@ export default function CartBar({ onCartClick }: CartBarProps) {
   // Cart empty hai toh sirf back button dikhao
   if (count === 0) {
     return (
-      <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-4 pb-4">
+      <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 px-4 pb-2">
         <div className="flex justify-start">
           <button
             onClick={() => window.history.back()}
@@ -46,7 +45,7 @@ export default function CartBar({ onCartClick }: CartBarProps) {
 
   // Cart mein items hain — back + cart bar dikhao
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-40 px-4 pb-4">
+    <div className="md:hidden fixed bottom-16 left-0 right-0 z-40 px-4 pb-2">
       <div className="flex items-center gap-3">
 
         {/* Back button */}
